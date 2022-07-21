@@ -19,7 +19,7 @@ def get_image_name(url):
     return image_name
 
 
-def get_photo_upload_url(vk_token, group_id):
+def get_upload_url(vk_token, group_id):
     url = 'https://api.vk.com/method/photos.getWallUploadServer'
     params = {
         'access_token': vk_token,
@@ -32,9 +32,20 @@ def get_photo_upload_url(vk_token, group_id):
     return upload_url
 
 
+def upload_image_to_server(path, upload_url):
+    with open(path, 'rb') as file:
+        files = {
+            'photo': file,  
+        }
+        response = requests.post(upload_url, files=files)
+        response.raise_for_status()
+    image = response.json()
+    return image
+
+
 def main():
     os.makedirs('files/', exist_ok=True)
-    url = 'https://xkcd.com/12/info.0.json'
+    url = 'https://xkcd.com/13/info.0.json'
     response = requests.get(url)
     response.raise_for_status()
     comic = response.json()
@@ -48,8 +59,11 @@ def main():
     vk_group_id = os.getenv('VK_GROUP_ID')
     vk_token = os.getenv('VK_ACCESS_TOKEN')
 
-    upload_url = get_photo_upload_url(vk_token, vk_group_id)
-     
+    upload_url = get_upload_url(vk_token, vk_group_id)
+    image_path = 'files/canyon_small.jpg'
+    image = upload_image_to_server(image_path, upload_url)
+    
+
 
 if __name__ == "__main__":
     main()
