@@ -1,7 +1,9 @@
+from urllib import response
 from dotenv import load_dotenv
 import requests
 from urllib.parse import unquote, urlparse
 import os
+from random import randint
 
 
 def image_download(url, path):
@@ -16,6 +18,14 @@ def get_image_name(url):
     image_url = unquote(image_url, encoding='utf-8', errors='replace')
     image_name = os.path.split(image_url)[1]
     return image_name
+
+
+def get_number_of_commics():
+    url = 'https://xkcd.com/info.0.json'
+    response = requests.get(url)
+    response.raise_for_status()
+    comics_count = response.json()['num']
+    return comics_count
 
 
 def get_comic(comic_number):
@@ -85,17 +95,20 @@ def post_image(vk_group_id, vk_token, image, message):
 
 
 def main():
+
+    load_dotenv()
+
+    vk_group_id = os.getenv('VK_GROUP_ID')
+    vk_token = os.getenv('VK_ACCESS_TOKEN')
+    
     os.makedirs('files/', exist_ok=True)
-    comic = get_comic(124)
+    comics_count = get_number_of_commics()
+    comic = get_comic(randint(1, comics_count))
     comment = comic['alt']
     image_url = comic['img']
     image_name = get_image_name(image_url)
-    image_download(image_url, f'files/{image_name}')
     
-    load_dotenv()
-    vk_group_id = os.getenv('VK_GROUP_ID')
-    vk_token = os.getenv('VK_ACCESS_TOKEN')
-
+    image_download(image_url, f'files/{image_name}')
     upload_url = get_upload_url(vk_token, vk_group_id)
     image_path = f'files/{image_name}'
     image = upload_image_to_server(image_path, upload_url)
