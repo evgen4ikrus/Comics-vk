@@ -1,9 +1,9 @@
-from urllib import response
-from dotenv import load_dotenv
-import requests
-from urllib.parse import unquote, urlparse
 import os
 from random import randint
+from urllib.parse import unquote, urlparse
+
+import requests
+from dotenv import load_dotenv
 
 
 def image_download(url, path):
@@ -52,7 +52,7 @@ def get_upload_url(vk_token, group_id):
 def upload_image_to_server(path, upload_url):
     with open(path, 'rb') as file:
         files = {
-            'photo': file,  
+            'photo': file,
         }
         response = requests.post(upload_url, files=files)
         response.raise_for_status()
@@ -79,7 +79,7 @@ def post_image(vk_group_id, vk_token, image, message):
     url = 'https://api.vk.com/method/wall.post'
     owner_id = image['response'][0]['owner_id']
     media_id = image['response'][0]['id']
-    
+
     params = {
         'access_token': vk_token,
         'v': 5.131,
@@ -91,7 +91,6 @@ def post_image(vk_group_id, vk_token, image, message):
     response = requests.post(url, params=params)
     response.raise_for_status()
     return response.json()
-    
 
 
 def main():
@@ -100,22 +99,23 @@ def main():
 
     vk_group_id = os.getenv('VK_GROUP_ID')
     vk_token = os.getenv('VK_ACCESS_TOKEN')
-    
+
     os.makedirs('files/', exist_ok=True)
     comics_count = get_number_of_commics()
     comic = get_comic(randint(1, comics_count))
     comment = comic['alt']
     image_url = comic['img']
     image_name = get_image_name(image_url)
-    
+
     image_download(image_url, f'files/{image_name}')
     upload_url = get_upload_url(vk_token, vk_group_id)
     image_path = f'files/{image_name}'
     image = upload_image_to_server(image_path, upload_url)
     comic = save_image_to_album(vk_token, vk_group_id, image)
     post_image(vk_group_id, vk_token, comic, comment)
-    
+
     os.remove(image_path)
+
 
 if __name__ == "__main__":
     main()
