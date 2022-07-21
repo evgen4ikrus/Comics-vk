@@ -115,6 +115,7 @@ def main():
     comic = save_image_to_album(vk_token, vk_group_id, image)
     post_image(vk_group_id, vk_token, comic, comment)
     
+    os.remove(image_path)
 
 if __name__ == "__main__":
     main()
