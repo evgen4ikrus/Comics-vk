@@ -43,9 +43,24 @@ def upload_image_to_server(path, upload_url):
     return image
 
 
+def save_image_to_album(vk_token, vk_group_id, image):
+    url = 'https://api.vk.com/method/photos.saveWallPhoto'
+    params = {
+        'access_token': vk_token,
+        'group_id': vk_group_id,
+        'server': image['server'],
+        'photo': image['photo'],
+        'hash': image['hash'],
+        'v': 5.131,
+    }
+    response = requests.post(url, params=params)
+    response.raise_for_status()
+    return response.json()
+
+
 def main():
     os.makedirs('files/', exist_ok=True)
-    url = 'https://xkcd.com/13/info.0.json'
+    url = 'https://xkcd.com/15/info.0.json'
     response = requests.get(url)
     response.raise_for_status()
     comic = response.json()
@@ -60,10 +75,10 @@ def main():
     vk_token = os.getenv('VK_ACCESS_TOKEN')
 
     upload_url = get_upload_url(vk_token, vk_group_id)
-    image_path = 'files/canyon_small.jpg'
+    image_path = 'files/just_alerting_you.jpg'
     image = upload_image_to_server(image_path, upload_url)
+    print(save_image_to_album(vk_token, vk_group_id, image))
     
-
 
 if __name__ == "__main__":
     main()
