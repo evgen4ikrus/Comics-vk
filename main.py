@@ -18,6 +18,14 @@ def get_image_name(url):
     return image_name
 
 
+def get_comic(comic_number):
+    url = f'https://xkcd.com/{comic_number}/info.0.json'
+    response = requests.get(url)
+    response.raise_for_status()
+    comic = response.json()
+    return comic
+
+
 def get_upload_url(vk_token, group_id):
     url = 'https://api.vk.com/method/photos.getWallUploadServer'
     params = {
@@ -78,22 +86,18 @@ def post_image(vk_group_id, vk_token, image, message):
 
 def main():
     os.makedirs('files/', exist_ok=True)
-    url = 'https://xkcd.com/15/info.0.json'
-    response = requests.get(url)
-    response.raise_for_status()
-    comic = response.json()
+    comic = get_comic(124)
     comment = comic['alt']
     image_url = comic['img']
     image_name = get_image_name(image_url)
     image_download(image_url, f'files/{image_name}')
-    
     
     load_dotenv()
     vk_group_id = os.getenv('VK_GROUP_ID')
     vk_token = os.getenv('VK_ACCESS_TOKEN')
 
     upload_url = get_upload_url(vk_token, vk_group_id)
-    image_path = 'files/just_alerting_you.jpg'
+    image_path = f'files/{image_name}'
     image = upload_image_to_server(image_path, upload_url)
     comic = save_image_to_album(vk_token, vk_group_id, image)
     post_image(vk_group_id, vk_token, comic, comment)
