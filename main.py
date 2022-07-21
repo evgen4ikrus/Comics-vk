@@ -22,8 +22,9 @@ def main():
     url = 'https://xkcd.com/info.0.json'
     response = requests.get(url)
     response.raise_for_status()
-    r = response.json()
-    image_url = r['img']
+    comic = response.json()
+    comment = comic['alt']
+    image_url = comic['img']
     image_name = get_image_name(image_url)
     image_download(image_url, f'files/{image_name}')
 
