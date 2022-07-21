@@ -1,4 +1,3 @@
-from urllib import response
 from dotenv import load_dotenv
 import requests
 from urllib.parse import unquote, urlparse
@@ -58,6 +57,25 @@ def save_image_to_album(vk_token, vk_group_id, image):
     return response.json()
 
 
+def post_image(vk_group_id, vk_token, image, message):
+    url = 'https://api.vk.com/method/wall.post'
+    owner_id = image['response'][0]['owner_id']
+    media_id = image['response'][0]['id']
+    
+    params = {
+        'access_token': vk_token,
+        'v': 5.131,
+        'owner_id': int(f'-{vk_group_id}'),
+        'attachments': f'photo{owner_id}_{media_id}',
+        'from_group': 1,
+        'message': message,
+    }
+    response = requests.post(url, params=params)
+    response.raise_for_status()
+    return response.json()
+    
+
+
 def main():
     os.makedirs('files/', exist_ok=True)
     url = 'https://xkcd.com/15/info.0.json'
@@ -77,7 +95,8 @@ def main():
     upload_url = get_upload_url(vk_token, vk_group_id)
     image_path = 'files/just_alerting_you.jpg'
     image = upload_image_to_server(image_path, upload_url)
-    print(save_image_to_album(vk_token, vk_group_id, image))
+    comic = save_image_to_album(vk_token, vk_group_id, image)
+    post_image(vk_group_id, vk_token, comic, comment)
     
 
 if __name__ == "__main__":
