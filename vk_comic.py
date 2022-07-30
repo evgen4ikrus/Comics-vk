@@ -65,7 +65,8 @@ def upload_image_to_server(path, upload_url):
     return server, photo, photo_hash
 
 
-def save_image_to_album(vk_token, vk_group_id, api_version, server, photo, hash):
+def save_image_to_album(vk_token, vk_group_id,
+                        api_version, server, photo, hash):
     url = 'https://api.vk.com/method/photos.saveWallPhoto'
     params = {
         'access_token': vk_token,
@@ -106,7 +107,7 @@ def main():
     vk_token = os.getenv('VK_ACCESS_TOKEN')
     api_version = 5.131
     os.makedirs('files/', exist_ok=True)
-    
+
     try:
         comics_count = get_number_of_commics()
         comic = get_comic(randint(1, comics_count))
@@ -114,11 +115,13 @@ def main():
         image_url = comic['img']
         image_name = get_image_name(image_url)
         download_image(image_url, f'files/{image_name}')
-        
+
         upload_url = get_upload_url(vk_token, vk_group_id, api_version)
         image_path = f'files/{image_name}'
-        server, photo, photo_hash = upload_image_to_server(image_path, upload_url)
-        comic = save_image_to_album(vk_token, vk_group_id, api_version, server, photo, photo_hash)
+        server, photo, photo_hash = upload_image_to_server(image_path,
+                                                           upload_url)
+        comic = save_image_to_album(vk_token, vk_group_id, api_version,
+                                    server, photo, photo_hash)
         post_image(vk_group_id, vk_token, comic, api_version, comment)
 
     finally:
