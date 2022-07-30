@@ -1,3 +1,4 @@
+from http import server
 import os
 from random import randint
 from urllib.parse import unquote, urlparse
@@ -56,18 +57,21 @@ def upload_image_to_server(path, upload_url):
         }
         response = requests.post(upload_url, files=files)
         response.raise_for_status()
-    image = response.json()
-    return image
+    save_data = response.json()
+    server = save_data['server']
+    photo = save_data['photo']
+    photo_hash = save_data['hash']
+    return server, photo, photo_hash
 
 
-def save_image_to_album(vk_token, vk_group_id, api_version, image):
+def save_image_to_album(vk_token, vk_group_id, api_version, server, photo, hash):
     url = 'https://api.vk.com/method/photos.saveWallPhoto'
     params = {
         'access_token': vk_token,
         'group_id': vk_group_id,
-        'server': image['server'],
-        'photo': image['photo'],
-        'hash': image['hash'],
+        'server': server,
+        'photo': photo,
+        'hash': hash,
         'v': api_version,
     }
     response = requests.post(url, params=params)
@@ -111,8 +115,8 @@ def main():
     download_image(image_url, f'files/{image_name}')
     upload_url = get_upload_url(vk_token, vk_group_id, api_version)
     image_path = f'files/{image_name}'
-    image = upload_image_to_server(image_path, upload_url)
-    comic = save_image_to_album(vk_token, vk_group_id, api_version, image)
+    server, photo, photo_hash = upload_image_to_server(image_path, upload_url)
+    comic = save_image_to_album(vk_token, vk_group_id, api_version, server, photo, photo_hash)
     post_image(vk_group_id, vk_token, comic, api_version, comment)
 
     os.remove(image_path)
