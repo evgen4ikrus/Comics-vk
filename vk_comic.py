@@ -38,12 +38,12 @@ def get_comic(comic_number):
     return comic
 
 
-def get_upload_url(vk_token, group_id, api_version):
+def get_upload_url(vk_token, group_id, vk_api_version):
     url = 'https://api.vk.com/method/photos.getWallUploadServer'
     params = {
         'access_token': vk_token,
         'group_id': group_id,
-        'v': api_version,
+        'v': vk_api_version,
     }
     response = requests.get(url, params=params)
     response.raise_for_status()
@@ -66,7 +66,7 @@ def upload_image_to_server(path, upload_url):
 
 
 def save_image_to_album(vk_token, vk_group_id,
-                        api_version, server, photo, hash):
+                        vk_api_version, server, photo, hash):
     url = 'https://api.vk.com/method/photos.saveWallPhoto'
     params = {
         'access_token': vk_token,
@@ -74,21 +74,21 @@ def save_image_to_album(vk_token, vk_group_id,
         'server': server,
         'photo': photo,
         'hash': hash,
-        'v': api_version,
+        'v': vk_api_version,
     }
     response = requests.post(url, params=params)
     response.raise_for_status()
     return response.json()
 
 
-def post_image(vk_group_id, vk_token, image, api_version, message):
+def post_image(vk_group_id, vk_token, image, vk_api_version, message):
     url = 'https://api.vk.com/method/wall.post'
     owner_id = image['response'][0]['owner_id']
     media_id = image['response'][0]['id']
 
     params = {
         'access_token': vk_token,
-        'v': api_version,
+        'v': vk_api_version,
         'owner_id': -int(vk_group_id),
         'attachments': f'photo{owner_id}_{media_id}',
         'from_group': 1,
@@ -105,7 +105,7 @@ def main():
 
     vk_group_id = os.getenv('VK_GROUP_ID')
     vk_token = os.getenv('VK_ACCESS_TOKEN')
-    api_version = 5.131
+    vk_api_version = 5.131
     os.makedirs('files/', exist_ok=True)
 
     try:
@@ -116,13 +116,13 @@ def main():
         image_name = get_image_name(image_url)
         download_image(image_url, f'files/{image_name}')
 
-        upload_url = get_upload_url(vk_token, vk_group_id, api_version)
+        upload_url = get_upload_url(vk_token, vk_group_id, vk_api_version)
         image_path = f'files/{image_name}'
         server, photo, photo_hash = upload_image_to_server(image_path,
                                                            upload_url)
-        comic = save_image_to_album(vk_token, vk_group_id, api_version,
+        comic = save_image_to_album(vk_token, vk_group_id, vk_api_version,
                                     server, photo, photo_hash)
-        post_image(vk_group_id, vk_token, comic, api_version, comment)
+        post_image(vk_group_id, vk_token, comic, vk_api_version, comment)
 
     finally:
         shutil.rmtree('files/')
