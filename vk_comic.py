@@ -87,7 +87,7 @@ def post_image(vk_group_id, vk_token, image, api_version, message):
     params = {
         'access_token': vk_token,
         'v': api_version,
-        'owner_id': int(f'-{vk_group_id}'),
+        'owner_id': -int(vk_group_id),
         'attachments': f'photo{owner_id}_{media_id}',
         'from_group': 1,
         'message': message,
