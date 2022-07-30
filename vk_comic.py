@@ -6,7 +6,7 @@ import requests
 from dotenv import load_dotenv
 
 
-def image_download(url, path):
+def download_image(url, path):
     response = requests.get(url)
     response.raise_for_status()
     with open(path, 'wb') as file:
@@ -107,7 +107,7 @@ def main():
     image_url = comic['img']
     image_name = get_image_name(image_url)
 
-    image_download(image_url, f'files/{image_name}')
+    download_image(image_url, f'files/{image_name}')
     upload_url = get_upload_url(vk_token, vk_group_id)
     image_path = f'files/{image_name}'
     image = upload_image_to_server(image_path, upload_url)
